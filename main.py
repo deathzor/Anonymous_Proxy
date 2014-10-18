@@ -4,6 +4,10 @@ import urllib2
 from urlparse import urlparse
 
 PORT_NUMBER = 8082
+#FIXME Not everything listed here 
+potental_html = {
+	'text/html'
+}
 #FIXME this table is more then likely incomplete.
 html_escape_table = {
     "&": "&amp;",
@@ -16,9 +20,9 @@ html_escape_table = {
 #This class will handle browser requests and reply with the real html
 class proxy(BaseHTTPRequestHandler):
 	def get_url(self,server,page):
-		#FIXME currently supports http only because urllib2 has no cert validation
+		#FIXME hardcoded to https for the future still no cert validation 
 		try:		
-			response = urllib2.urlopen("http://"+server+page)
+			response = urllib2.urlopen("https://"+server+page)
 		except urllib2.HTTPError:
 			return {'html':"",'header':{'contentType':''}}
 		headerContentType = response.info().getheader('Content-Type');
@@ -43,7 +47,10 @@ class proxy(BaseHTTPRequestHandler):
 		self.send_header('Expires',0);
 		self.end_headers()
 		# Send the html message
-		self.wfile.write("<iframe srcdoc='"+self.html_escape(returnData['html'].replace("https://","http://"))+"' sandbox='allow-forms' style='width:100%;height:100%;border:none;'></iframe>")
+		if returnData['header']['contentType'] in potental_html:
+			self.wfile.write("<iframe srcdoc='"+self.html_escape(returnData['html'].replace("https://","http://"))+"' sandbox='allow-forms' style='width:100%;height:100%;border:none;'></iframe>")
+		else:
+			self.wfile.write(returnData['html']);					
 		return
 try:
 	#Create a web server and define the handler to manage the
