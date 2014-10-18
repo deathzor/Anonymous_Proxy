@@ -2,7 +2,7 @@ Anonymous_Proxy
 ===============
 
 A proxy Designed to strip away as much of the information from the Browser as Possible<br>
-
+<br>
 TODO:<br>
 1. Currently NO SSL support is implemented this needs to be enforced<br>
 2. Currently Everything in in once file this needs to be fix <br>
@@ -14,8 +14,8 @@ TODO:<br>
 8. SSL Support on the request side needs to be implemented. <br>
 9. https to http replace needs to be removed ( dirty hack to keep the browser from going to ssl pages ). <br>
 10. Some other stuff i more then like forgot about. <br>
-
-What works:
+<br>
+What works:<br>
 1. Cache is set to 0 for all requests AND urllib2 ignore's cache completely <br>
 2. Cookie's are stripped from the client<br>
 3. Javascript is disabled ( via html5 sandbox frames ). <br>
