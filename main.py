@@ -54,7 +54,6 @@ class proxy(BaseHTTPRequestHandler):
 		self.send_response(200)
 		#pass on the content type
 		self.send_header('Content-type',returnData['header']['contentType'])
-		print returnData['header']['contentType'];
 		#setup a no cache header to hopefully prevent cache revelations
 		self.send_header('Cache-Control',"no-cache, no-store, must-revalidate");
 		self.send_header('Pragma', "no-cache");
@@ -62,7 +61,6 @@ class proxy(BaseHTTPRequestHandler):
 		self.end_headers()
 		# Send the html message
 		if returnData['header']['contentType'].split(';')[0] in potental_html:
-			print "HTML";
 			#fixing Links because we are striping https to http
 			returnData['html'] = returnData['html'].replace("https://", "http://");
 			#fixing Links because the site is loaded in a iframe
