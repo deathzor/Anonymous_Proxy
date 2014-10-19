@@ -1,18 +1,20 @@
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 import requests
+from webserver import filter
 from urlparse import urlparse
 #FIXME Not everything listed here 
-potental_html = {
+htmlType = {
 	'text/html'
 }
+imageType = {
+	'image/jpeg',
+	'image/png'
+}
+cssType = {
+	'text/css'
+}
 #FIXME this table is more then likely incomplete.
-html_escape_table = {
-    "&": "&amp;",
-    '"': "&quot;",
-    "'": "&apos;",
-    ">": "&gt;",
-    "<": "&lt;",
-    }
+
 class proxy(BaseHTTPRequestHandler):
 	def get_url(self,server,page):
 		#FIXME hardcoded to https. 
@@ -28,14 +30,10 @@ class proxy(BaseHTTPRequestHandler):
 		#FIXME deal with http status other then 200	
 		if response.status_code	== 301:
 			#FIXME not exactly the same thing as a 301
-			return {'security':0,'html':"<META http-equiv=\"refresh\" content=\"0; URL="+html_escape(str(response.headers['location']))+"\">",'header':{'contentType':'text/html'}}
+			return {'security':0,'html':"<META http-equiv=\"refresh\" content=\"0; URL="+filter.htmlEscape(str(response.headers['location']))+"\">",'header':{'contentType':'text/html'}}
 		if response.status_code == 200:
 			return {'security':1,'html':response.content,'header':{'contentType':response.headers['content-type']}}
 		return {'security':1,'html':"<b>Unknown Status</b>"+str(response.status_code),'header':{'contentType':'text/html'}} 
-	#Handler for the GET requests
-	def html_escape(self,text):
-	    """Produce entities within text."""
-    	    return "".join(html_escape_table.get(c,c) for c in text)
 
 	def do_GET(self):
 		server = self.headers.get('host');
@@ -55,12 +53,10 @@ class proxy(BaseHTTPRequestHandler):
 		self.send_header('Expires',0);
 		self.end_headers()
 		# Send the html message
-		if returnData['header']['contentType'].split(';')[0] in potental_html and returnData['security'] == 1:
-			#fixing Links because we are striping https to http
-			returnData['html'] = returnData['html'].replace("https://", "http://");
-			#fixing Links because the site is loaded in a iframe
-			returnData['html'] = returnData['html'].replace("<a", "<a target=\"_top\"");
-			self.wfile.write("<html><body><iframe srcdoc='"+self.html_escape(returnData['html'])+"' sandbox='allow-forms allow-top-navigation' style='width:100%;height:100%;border:none;' seamless></iframe></body></html>")
-		else:
+		if returnData['header']['contentType'].split(';')[0] in htmlType and returnData['security'] == 1:
+			self.wfile.write(filter.html(returnData['html']));
+		if returnData['header']['contentType'].split(':')[0] in imageType:
 			self.wfile.write(returnData['html']);
+		if returnData['header']['contentType'].split(':')[0] in cssType:
+			self.wfile.write(filter.css(returnData['html']));
 		return
